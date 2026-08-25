@@ -1,161 +1,46 @@
-export type ExtensionPermission =
-  | "project:read"
-  | "artifact:read"
-  | "artifact:create"
-  | "network:use"
-  | "models:use"
-  | "models:install"
-  | "compute:gpu"
-  | "native:execute"
-  | "external:apps"
-  | "secrets:read"
-  | "background:run";
+// Контрактные типы манифеста, сгенерированные из схем osnova-spec (scripts/generate-contracts.mjs).
+import type {
+  ExtensionManifest,
+  Permission as ExtensionPermission,
+  OperationRisk,
+  RuntimeKind,
+  RuntimeLifecycle,
+  Runtime as RuntimeContribution,
+  Resources as ResourceRequirements,
+  ModelDependency,
+  ExtensionContributions,
+  Theme as ThemeContribution,
+  Tool as ToolContribution,
+  Operation as OperationDefinition,
+  ArtifactType as ArtifactTypeContribution,
+  ContextProvider as ContextProviderContribution,
+  Connector as ConnectorContribution,
+  ModelProvider as ModelProviderContribution,
+  View as ViewContribution
+} from "./generated/extension-manifest.generated.js";
 
-export type OperationRisk =
-  | "safe-read"
-  | "project-write"
-  | "network-egress"
-  | "external-side-effect"
-  | "privileged";
-
-export type RuntimeKind = "builtin" | "node-process" | "native-process" | "oci" | "remote";
-export type RuntimeLifecycle = "job" | "project" | "shared";
-export type ContextMode = "none" | "automatic" | "declarative" | "custom";
+export type {
+  ExtensionManifest,
+  ExtensionPermission,
+  OperationRisk,
+  RuntimeKind,
+  RuntimeLifecycle,
+  RuntimeContribution,
+  ResourceRequirements,
+  ModelDependency,
+  ExtensionContributions,
+  ThemeContribution,
+  ToolContribution,
+  OperationDefinition,
+  ArtifactTypeContribution,
+  ContextProviderContribution,
+  ConnectorContribution,
+  ModelProviderContribution,
+  ViewContribution
+};
+// Типы API провайдеров контекста, не входящие в контракт манифеста.
 export type ContextLevel = "compact" | "expanded";
-
-export interface RuntimeContribution {
-  id: string;
-  kind: RuntimeKind;
-  lifecycle: RuntimeLifecycle;
-  entry?: string;
-  image?: string;
-  endpoint?: string;
-  protocol?: "osnova-tool-v1" | "mcp";
-  idleTimeoutSeconds?: number;
-  resources?: ResourceRequirements;
-  models?: ModelDependency[];
-}
-
-export interface ResourceRequirements {
-  cpu?: number;
-  memoryMb?: number;
-  diskMb?: number;
-  gpu?: boolean;
-  network?: boolean;
-}
-
-export interface ModelDependency {
-  id: string;
-  version: string;
-  source: string;
-  sha256: string;
-  size: number;
-  license: string;
-  platforms?: Array<"win32" | "darwin">;
-  architectures?: Array<"x64" | "arm64">;
-}
-
-export interface ThemeContribution {
-  id: string;
-  title: string;
-  tokens: string;
-  icons?: string;
-}
-
-export interface ToolContribution {
-  id: string;
-  title: string;
-  description?: string;
-  runtimeId?: string;
-  icon?: string;
-}
-
-export interface OperationDefinition {
-  id: string;
-  toolId: string;
-  version: string;
-  title: string;
-  description?: string;
-  inputSchema: JsonSchema;
-  outputSchema: JsonSchema;
-  accepts?: string[];
-  produces?: string[];
-  risk: OperationRisk;
-  agentVisibility: "hidden" | "explicit" | "automatic";
-  execution: "immediate" | "job";
-  timeoutSeconds?: number;
-  cancellable?: boolean;
-  idempotent?: boolean;
-  permissions: ExtensionPermission[];
-  resources?: ResourceRequirements;
-}
-
-export interface ArtifactTypeContribution {
-  id: string;
-  title: string;
-  mediaTypes?: string[];
-  context:
-    | { mode: "none" | "automatic" }
-    | { mode: "declarative"; fields: string[] }
-    | { mode: "custom"; providerId: string };
-}
-
-export interface ContextProviderContribution {
-  id: string;
-  artifactTypes: string[];
-  version: string;
-  runtimeId: string;
-  resourceUriTemplate?: string;
-}
-
-export interface ConnectorContribution {
-  id: string;
-  title: string;
-  runtimeId: string;
-  scope: "project" | "external-explicit";
-  produces: string[];
-  permissions: ExtensionPermission[];
-}
-
-export interface ModelProviderContribution {
-  id: string;
-  title: string;
-  runtimeId: string;
-  recipient: "local" | "cloud";
-  capabilities: Array<"chat" | "vision" | "embeddings" | "structured-output">;
-}
-
-export interface ViewContribution {
-  id: string;
-  title: string;
-  toolId: string;
-  entry: string;
-}
-
-export interface ExtensionContributions {
-  themes?: ThemeContribution[];
-  tools?: ToolContribution[];
-  operations?: OperationDefinition[];
-  artifactTypes?: ArtifactTypeContribution[];
-  contextProviders?: ContextProviderContribution[];
-  connectors?: ConnectorContribution[];
-  modelProviders?: ModelProviderContribution[];
-  views?: ViewContribution[];
-}
-
-export interface ExtensionManifest {
-  manifestVersion: "1";
-  id: string;
-  name: string;
-  version: string;
-  description?: string;
-  publisher?: string;
-  license?: string;
-  osnova: { minVersion: string };
-  permissions: ExtensionPermission[];
-  runtimes?: RuntimeContribution[];
-  contributes: ExtensionContributions;
-}
+export type ContextMode = "none" | "automatic" | "declarative" | "custom";
 
 export interface ArtifactInput {
   artifactId: string;
