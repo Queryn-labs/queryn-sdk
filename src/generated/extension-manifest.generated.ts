@@ -1,5 +1,5 @@
 /**
- * Generated from the osnova-spec contract schemas (scripts/generate-contracts.mjs).
+ * Generated from the queryn-spec contract schemas (scripts/generate-contracts.mjs).
  * Do not edit by hand: change the schema and regenerate.
  */
 
@@ -25,7 +25,7 @@ export type Runtime = {
   entry?: string;
   image?: string;
   endpoint?: string;
-  protocol?: "osnova-tool-v1" | "mcp";
+  protocol?: "queryn-tool-v1" | "mcp";
   idleTimeoutSeconds?: number;
   resources?: Resources;
   models?: ModelDependency[];
@@ -54,7 +54,7 @@ export interface ExtensionManifest {
   description?: string;
   publisher?: string;
   license?: string;
-  osnova: {
+  queryn: {
     minVersion: string;
   };
   permissions: Permission[];

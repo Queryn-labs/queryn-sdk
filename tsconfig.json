@@ -10,7 +10,7 @@
     "skipLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@osnova/plugin-sdk": ["src/index.ts"]
+      "@queryn/plugin-sdk": ["src/index.ts"]
     }
   },
   "include": ["src/**/*.ts", "templates/**/*.ts"]

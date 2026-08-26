@@ -4,6 +4,6 @@
   "type": "module",
   "private": true,
   "dependencies": {
-    "@osnova/plugin-sdk": "^0.2.0"
+    "@queryn/plugin-sdk": "^0.2.0"
   }
 }

@@ -1,13 +1,13 @@
-# osnova-plugin-sdk
+# queryn-sdk
 
-Extension SDK и Developer Kit для Osnova Reborn.
-Каноническая [страница документации](https://github.com/Queryn-labs/osnova-docs) содержит правила расширений и их место в архитектуре.
+Extension SDK и Developer Kit для Queryn.
+Каноническая [страница документации](https://github.com/Queryn-labs/queryn-docs) содержит правила расширений и их место в архитектуре.
 
 ## Статус
 
 Extension Manifest v1, operation handlers, artifact candidates, context
 providers, connectors, model providers, package validation, testkit и headless
-CLI. Extension host реализован в `osnova-runtime`.
+CLI. Extension host реализован в `queryn-runtime`.
 
 ## Stack
 
@@ -41,20 +41,20 @@ SDK определяет публичную поверхность автора 
 
 SDK должен оставаться явным и стабильным. Он определяет API и формат упаковки,
 но не запускает и не размещает расширения. Их host-среда, lifecycle, process/OCI
-изоляция, permissions enforcement и RPC находятся в `osnova-runtime`.
+изоляция, permissions enforcement и RPC находятся в `queryn-runtime`.
 SDK не добавляет host APIs без понятной permission model и пути enforcement на стороне runtime.
-`osnova-desktop` подключает runtime через свой IPC bridge.
+`queryn-desktop` подключает runtime через свой IPC bridge.
 
 ## Связанные репозитории
 
-- `osnova-runtime` загружает расширения, исполняет их runtime и проверяет
+- `queryn-runtime` загружает расширения, исполняет их runtime и проверяет
   permissions.
-- `osnova-desktop` предоставляет пользовательский интерфейс и IPC-интеграцию
+- `queryn-desktop` предоставляет пользовательский интерфейс и IPC-интеграцию
   с runtime.
-- `osnova-core` предоставляет общие типы проекта.
-- `osnova-plugins` содержит каталог плагинов.
-- `osnova-spec` определяет Extension Manifest v1 и связанные схемы.
-- `osnova-docs` содержит нормативные правила расширений и доверия.
+- `queryn-core` предоставляет общие типы проекта.
+- `queryn-extensions` содержит каталог расширений.
+- `queryn-spec` определяет Extension Manifest v1 и связанные схемы.
+- `queryn-docs` содержит нормативные правила расширений и доверия.
 
 ## Лицензия
 

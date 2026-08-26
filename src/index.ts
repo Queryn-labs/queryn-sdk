@@ -1,6 +1,6 @@
 /**
  * Public extension SDK contracts and validation helpers.
- * Manifest types mirror the generated osnova-spec contract.
+ * Manifest types mirror the generated queryn-spec contract.
  */
 import type {
   ExtensionManifest,
@@ -116,14 +116,14 @@ export interface ContextProviderInput {
 export type ContextProviderHandler = (input: ContextProviderInput) => Promise<ContextEnvelope> | ContextEnvelope;
 
 /** Defines a manifest and the handlers exposed by an extension. */
-export interface OsnovaExtension {
+export interface QuerynExtension {
   manifest: ExtensionManifest;
   operations?: Record<string, OperationHandler>;
   contextProviders?: Record<string, ContextProviderHandler>;
 }
 
 /** Validates an extension manifest and ensures its handlers are declared. */
-export function defineExtension(extension: OsnovaExtension): OsnovaExtension {
+export function defineExtension(extension: QuerynExtension): QuerynExtension {
   const validation = validateExtensionManifest(extension.manifest);
   if (!validation.valid) {
     throw new Error(validation.issues.join("\n"));
@@ -195,7 +195,7 @@ export function validateExtensionManifest(manifest: ExtensionManifest): Manifest
   if (!isNamespacedId(manifest.id)) issues.push("Extension id must be namespaced.");
   if (!manifest.name.trim()) issues.push("Extension name is required.");
   if (!isSemver(manifest.version)) issues.push("Extension version must be semver.");
-  if (!manifest.osnova?.minVersion || !isSemver(manifest.osnova.minVersion)) issues.push("osnova.minVersion must be semver.");
+  if (!manifest.queryn?.minVersion || !isSemver(manifest.queryn.minVersion)) issues.push("queryn.minVersion must be semver.");
   for (const permission of manifest.permissions) {
     if (!knownPermissions.has(permission)) issues.push(`Unknown permission: ${permission}`);
   }
@@ -416,7 +416,7 @@ export interface PluginManifest {
   description?: string;
   entry: string;
   permissions: LegacyPermission[];
-  osnova: { minVersion: string };
+  queryn: { minVersion: string };
 }
 
 /** Describes a command registered through the experimental 0.1 API. */
@@ -443,11 +443,11 @@ export interface CommandsApi { register(command: CommandDefinition): void }
 export interface PluginContext { manifest: PluginManifest; commands: CommandsApi }
 
 /** Defines a plugin for the experimental 0.1 compatibility API. */
-export interface OsnovaPlugin {
+export interface QuerynPlugin {
   manifest: PluginManifest;
   activate(context: PluginContext): Promise<void> | void;
   deactivate?(): Promise<void> | void;
 }
 
 /** Preserves the inferred type of a compatibility plugin definition. */
-export function definePlugin(plugin: OsnovaPlugin): OsnovaPlugin { return plugin; }
+export function definePlugin(plugin: QuerynPlugin): QuerynPlugin { return plugin; }

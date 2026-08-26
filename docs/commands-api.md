@@ -1,6 +1,6 @@
 # Operations API
 
-Reborn extensions declare serializable operations in Extension Manifest v1 and
+Queryn extensions declare serializable operations in Extension Manifest v1 and
 provide handlers separately. `definePlugin` and Commands API remain only as an
 experimental 0.1 compatibility layer.
 

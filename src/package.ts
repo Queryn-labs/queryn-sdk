@@ -11,7 +11,7 @@ export interface PackedExtensionFile {
 }
 
 export interface PackedExtension {
-  format: "osnova-extension-package/1";
+  format: "queryn-extension-package/1";
   manifest: ExtensionManifest;
   files: PackedExtensionFile[];
   integrity: string;
@@ -36,7 +36,7 @@ export async function packExtension(sourceDirectory: string, outputPath: string)
   const integrity = createHash("sha256")
     .update(files.map((file) => `${file.path}:${file.sha256}`).join("\n"))
     .digest("hex");
-  const packed: PackedExtension = { format: "osnova-extension-package/1", manifest, files, integrity };
+  const packed: PackedExtension = { format: "queryn-extension-package/1", manifest, files, integrity };
   await mkdir(path.dirname(outputPath), { recursive: true });
   await writeFile(outputPath, `${JSON.stringify(packed, null, 2)}\n`, "utf8");
   return packed;
@@ -45,7 +45,7 @@ export async function packExtension(sourceDirectory: string, outputPath: string)
 async function listPackageFiles(rootPath: string, relativeDirectory = ""): Promise<string[]> {
   const entries = await readdir(path.join(rootPath, relativeDirectory), { withFileTypes: true });
   const nested = await Promise.all(entries.map(async (entry) => {
-    if (entry.name === "node_modules" || entry.name === ".git" || entry.name.startsWith(".osnova-package")) return [];
+    if (entry.name === "node_modules" || entry.name === ".git" || entry.name.startsWith(".queryn-package")) return [];
     const relativePath = path.posix.join(relativeDirectory.split(path.sep).join("/"), entry.name);
     return entry.isDirectory() ? listPackageFiles(rootPath, relativePath) : [relativePath];
   }));

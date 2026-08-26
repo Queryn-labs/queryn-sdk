@@ -1,5 +1,5 @@
 {
-  "name": "@osnova/plugin-sdk",
+  "name": "@queryn/plugin-sdk",
   "version": "0.2.0",
   "type": "module",
   "license": "MIT",
@@ -26,13 +26,13 @@
     "LICENSE"
   ],
   "bin": {
-    "osnova-extension": "./dist/cli.js"
+    "queryn-extension": "./dist/cli.js"
   },
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "npm run build && node dist/selftest.js",
-    "pretest": "node ../osnova-spec/scripts/generate-contracts.mjs --check && node ../osnova-spec/scripts/check-comment-hygiene.mjs --check --repo osnova-plugin-sdk"
+    "pretest": "node ../queryn-spec/scripts/generate-contracts.mjs --check && node ../queryn-spec/scripts/check-comment-hygiene.mjs --check --repo queryn-sdk"
   },
   "devDependencies": {
     "@types/node": "^22.10.7",
