@@ -1,4 +1,7 @@
-// Контрактные типы манифеста, сгенерированные из схем osnova-spec (scripts/generate-contracts.mjs).
+/**
+ * Public extension SDK contracts and validation helpers.
+ * Manifest types mirror the generated osnova-spec contract.
+ */
 import type {
   ExtensionManifest,
   Permission as ExtensionPermission,
@@ -19,6 +22,7 @@ import type {
   View as ViewContribution
 } from "./generated/extension-manifest.generated.js";
 
+/** Re-exports the generated Extension Manifest v1 contract types. */
 export type {
   ExtensionManifest,
   ExtensionPermission,
@@ -38,10 +42,14 @@ export type {
   ModelProviderContribution,
   ViewContribution
 };
-// Типы API провайдеров контекста, не входящие в контракт манифеста.
+// Context provider API types that are not part of the manifest contract.
+/** Controls the detail level requested from a context provider. */
 export type ContextLevel = "compact" | "expanded";
+
+/** Selects how an artifact context is produced. */
 export type ContextMode = "none" | "automatic" | "declarative" | "custom";
 
+/** Describes an artifact supplied to an operation or context provider. */
 export interface ArtifactInput {
   artifactId: string;
   type: string;
@@ -49,6 +57,7 @@ export interface ArtifactInput {
   payloads: Array<{ path: string; mediaType: string; role?: string }>;
 }
 
+/** Describes an artifact payload that an operation proposes for publication. */
 export interface ArtifactCandidate {
   id?: string;
   type: string;
@@ -59,12 +68,14 @@ export interface ArtifactCandidate {
   metadata?: Record<string, unknown>;
 }
 
+/** Contains structured output and artifact candidates returned by an operation. */
 export interface OperationResult {
   structured?: Record<string, unknown>;
   artifacts?: ArtifactCandidate[];
   message?: string;
 }
 
+/** Provides the project-scoped inputs and cancellation hooks for an operation. */
 export interface OperationContext {
   jobId: string;
   projectId: string;
@@ -76,8 +87,10 @@ export interface OperationContext {
   reportProgress(progress: number, message?: string): void;
 }
 
+/** Handles one operation invocation synchronously or asynchronously. */
 export type OperationHandler = (context: OperationContext) => Promise<OperationResult> | OperationResult;
 
+/** Carries provider-produced context together with source and recipient constraints. */
 export interface ContextEnvelope {
   level: ContextLevel;
   text?: string;
@@ -91,6 +104,7 @@ export interface ContextEnvelope {
   providerVersion: string;
 }
 
+/** Supplies an artifact and token budget to a context provider. */
 export interface ContextProviderInput {
   level: ContextLevel;
   artifact: ArtifactInput;
@@ -98,14 +112,17 @@ export interface ContextProviderInput {
   recipient: "local" | "cloud";
 }
 
+/** Builds a context envelope synchronously or asynchronously. */
 export type ContextProviderHandler = (input: ContextProviderInput) => Promise<ContextEnvelope> | ContextEnvelope;
 
+/** Defines a manifest and the handlers exposed by an extension. */
 export interface OsnovaExtension {
   manifest: ExtensionManifest;
   operations?: Record<string, OperationHandler>;
   contextProviders?: Record<string, ContextProviderHandler>;
 }
 
+/** Validates an extension manifest and ensures its handlers are declared. */
 export function defineExtension(extension: OsnovaExtension): OsnovaExtension {
   const validation = validateExtensionManifest(extension.manifest);
   if (!validation.valid) {
@@ -121,30 +138,37 @@ export function defineExtension(extension: OsnovaExtension): OsnovaExtension {
   return extension;
 }
 
+/** Preserves the inferred type of a tool contribution. */
 export function defineTool<T extends ToolContribution>(tool: T): T {
   return tool;
 }
 
+/** Preserves the inferred type of an operation contribution. */
 export function defineOperation<T extends OperationDefinition>(operation: T): T {
   return operation;
 }
 
+/** Preserves the inferred type of an artifact type contribution. */
 export function defineArtifactType<T extends ArtifactTypeContribution>(artifactType: T): T {
   return artifactType;
 }
 
+/** Preserves the inferred type of a context provider contribution. */
 export function defineContextProvider<T extends ContextProviderContribution>(provider: T): T {
   return provider;
 }
 
+/** Preserves the inferred type of a connector contribution. */
 export function defineConnector<T extends ConnectorContribution>(connector: T): T {
   return connector;
 }
 
+/** Preserves the inferred type of a model provider contribution. */
 export function defineModelProvider<T extends ModelProviderContribution>(provider: T): T {
   return provider;
 }
 
+/** Reports manifest validation status and human-readable issues. */
 export interface ManifestValidationResult {
   valid: boolean;
   issues: string[];
@@ -164,6 +188,7 @@ const knownPermissions = new Set<ExtensionPermission>([
   "background:run"
 ]);
 
+/** Validates manifest structure, permissions, references, resources, and runtime policy. */
 export function validateExtensionManifest(manifest: ExtensionManifest): ManifestValidationResult {
   const issues: string[] = [];
   if (manifest.manifestVersion !== "1") issues.push("manifestVersion must be 1.");
@@ -295,6 +320,7 @@ export function validateExtensionManifest(manifest: ExtensionManifest): Manifest
   return { valid: issues.length === 0, issues };
 }
 
+/** Represents the JSON Schema subset accepted for operation inputs and outputs. */
 export type JsonSchema = Record<string, unknown>;
 
 function validateContributionId(id: string, extensionId: string, label: string, issues: string[]): void {
@@ -314,6 +340,8 @@ function requiredRuntimePermissions(runtime?: RuntimeContribution): ExtensionPer
   ])];
 }
 
+// Unparseable endpoints are classified external so provider validation forces
+// a "cloud" recipient declaration; malformed input must never earn local trust.
 function isExternalEndpoint(endpoint: string): boolean {
   try { return !["127.0.0.1", "localhost", "::1"].includes(new URL(endpoint).hostname); }
   catch { return true; }
@@ -346,6 +374,7 @@ function validateOperationSchema(schema: JsonSchema, label: string, issues: stri
 }
 
 function isSafeSchemaPattern(pattern: string): boolean {
+  // Reject ReDoS-prone backreferences, lookahead/lookbehind, and nested quantifiers, and cap patterns at 512 characters.
   if (pattern.length > 512 || /\\[1-9]|\(\?[=!<]/.test(pattern) || /\([^)]*[+*][^)]*\)[+*{]/.test(pattern)) return false;
   try { new RegExp(pattern, "u"); return true; } catch { return false; }
 }
@@ -368,6 +397,7 @@ function isSafePackagePath(value: string): boolean {
 }
 
 // Compatibility layer for the experimental 0.1 command API.
+/** Defines permissions supported by the experimental 0.1 compatibility API. */
 export type LegacyPermission =
   | "project:read"
   | "project:write"
@@ -378,6 +408,7 @@ export type LegacyPermission =
   | "commands:register"
   | "ai:use";
 
+/** Describes a plugin manifest for the experimental 0.1 compatibility API. */
 export interface PluginManifest {
   id: string;
   name: string;
@@ -388,6 +419,7 @@ export interface PluginManifest {
   osnova: { minVersion: string };
 }
 
+/** Describes a command registered through the experimental 0.1 API. */
 export interface CommandDefinition {
   id: string;
   title: string;
@@ -395,16 +427,27 @@ export interface CommandDefinition {
   run: CommandHandler;
 }
 
+/** Handles one command invocation in the experimental 0.1 API. */
 export type CommandHandler = (context: CommandContext) => Promise<void> | void;
+
+/** Provides project and UI access to a compatibility command. */
 export interface CommandContext {
   project?: { rootPath: string; manifest: unknown };
   ui: { notify(message: string): void };
 }
+
+/** Registers commands exposed by a compatibility plugin. */
 export interface CommandsApi { register(command: CommandDefinition): void }
+
+/** Supplies a compatibility plugin with its manifest and command registry. */
 export interface PluginContext { manifest: PluginManifest; commands: CommandsApi }
+
+/** Defines a plugin for the experimental 0.1 compatibility API. */
 export interface OsnovaPlugin {
   manifest: PluginManifest;
   activate(context: PluginContext): Promise<void> | void;
   deactivate?(): Promise<void> | void;
 }
+
+/** Preserves the inferred type of a compatibility plugin definition. */
 export function definePlugin(plugin: OsnovaPlugin): OsnovaPlugin { return plugin; }

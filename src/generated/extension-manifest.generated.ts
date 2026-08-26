@@ -1,7 +1,6 @@
-/* eslint-disable */
 /**
- * Сгенерировано из контрактных схем osnova-spec (scripts/generate-contracts.mjs).
- * Не редактировать вручную: изменения вносятся в схемы и перегенерируются.
+ * Generated from the osnova-spec contract schemas (scripts/generate-contracts.mjs).
+ * Do not edit by hand: change the schema and regenerate.
  */
 
 export type NamespacedId = string;
