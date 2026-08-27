@@ -9,14 +9,14 @@ const [command = "help", ...args] = process.argv.slice(2);
 async function main(): Promise<void> {
   switch (command) {
     case "init":
-      await initExtension(args[0] ?? "osnova-extension", option(args, "--template") ?? "tool");
+      await initExtension(args[0] ?? "queryn-extension", option(args, "--template") ?? "tool");
       return;
     case "lint":
     case "test":
       await lintManifest(args[0] ?? "extension.json");
       return;
     case "pack":
-      await packExtension(path.resolve(args[0] ?? "."), path.resolve(args[1] ?? ".osnova-package.json"));
+      await packExtension(path.resolve(args[0] ?? "."), path.resolve(args[1] ?? ".queryn-package.json"));
       process.stdout.write("Extension package created.\n");
       return;
     case "dev":
@@ -27,7 +27,7 @@ async function main(): Promise<void> {
       process.stdout.write(`Node ${process.version}\nPlatform ${process.platform}/${process.arch}\nSDK ready\n`);
       return;
     default:
-      process.stdout.write("osnova extension <init|lint|test|pack|dev|doctor>\n\ninit DIRECTORY --template <theme|note-linter|tool|advanced|oci|mcp>\n");
+      process.stdout.write("queryn extension <init|lint|test|pack|dev|doctor>\n\ninit DIRECTORY --template <theme|note-linter|tool|advanced|oci|mcp>\n");
   }
 }
 
@@ -40,7 +40,7 @@ async function lintManifest(filePath: string): Promise<void> {
 
 async function initExtension(directory: string, template: string): Promise<void> {
   const rootPath = path.resolve(directory);
-  const id = `osnova.local.${path.basename(rootPath).toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
+  const id = `queryn.local.${path.basename(rootPath).toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
   await mkdir(path.join(rootPath, "src"), { recursive: true });
   const manifest = createTemplateManifest(id, path.basename(rootPath), template);
   await writeFile(path.join(rootPath, "extension.json"), `${JSON.stringify(manifest, null, 2)}\n`, { flag: "wx" });
@@ -48,33 +48,33 @@ async function initExtension(directory: string, template: string): Promise<void>
     name: id.replaceAll(".", "-"), version: "0.1.0", private: true, type: "module",
     scripts: {
       build: "tsc -p tsconfig.json",
-      lint: "osnova-extension lint extension.json",
-      test: "osnova-extension test extension.json",
-      pack: "osnova-extension pack . ./extension.osnova-package.json",
-      dev: "osnova-extension dev ."
+      lint: "queryn-extension lint extension.json",
+      test: "queryn-extension test extension.json",
+      pack: "queryn-extension pack . ./extension.queryn-package.json",
+      dev: "queryn-extension dev ."
     },
-    dependencies: { "@osnova/plugin-sdk": "^0.2.0" },
+    dependencies: { "@queryn/plugin-sdk": "^0.2.0" },
     devDependencies: { typescript: "^5.7.3" }
   }, null, 2)}\n`, { flag: "wx" });
   await writeFile(path.join(rootPath, "tsconfig.json"), `${JSON.stringify({
     compilerOptions: { target: "ES2022", module: "NodeNext", moduleResolution: "NodeNext", strict: true, resolveJsonModule: true, rootDir: "src", outDir: "dist" },
     include: ["src/**/*.ts"]
   }, null, 2)}\n`, { flag: "wx" });
-  await writeFile(path.join(rootPath, ".gitignore"), "node_modules/\ndist/\n*.osnova-package.json\n", { flag: "wx" });
-  await writeFile(path.join(rootPath, "src", "index.ts"), "import { defineExtension, type ExtensionManifest } from '@osnova/plugin-sdk';\n\nconst manifest = await import('../extension.json', { with: { type: 'json' } }).then((module) => module.default) as ExtensionManifest;\nexport default defineExtension({ manifest });\n", { flag: "wx" });
+  await writeFile(path.join(rootPath, ".gitignore"), "node_modules/\ndist/\n*.queryn-package.json\n", { flag: "wx" });
+  await writeFile(path.join(rootPath, "src", "index.ts"), "import { defineExtension, type ExtensionManifest } from '@queryn/plugin-sdk';\n\nconst manifest = await import('../extension.json', { with: { type: 'json' } }).then((module) => module.default) as ExtensionManifest;\nexport default defineExtension({ manifest });\n", { flag: "wx" });
   if (template === "theme") await writeFile(path.join(rootPath, "tokens.json"), `${JSON.stringify({ "surface.canvas": "#121212", "text.primary": "#f4f0ed", "accent.primary": "#d12f6a" }, null, 2)}\n`, { flag: "wx" });
   if (["note-linter", "tool", "advanced"].includes(template)) await writeFile(path.join(rootPath, "server.mjs"), processServerTemplate(id), { flag: "wx" });
   if (template === "oci") {
     await writeFile(path.join(rootPath, "server.mjs"), processServerTemplate(id), { flag: "wx" });
     await writeFile(path.join(rootPath, "Dockerfile"), "FROM node:22-alpine\nWORKDIR /app\nCOPY server.mjs /app/server.mjs\nUSER 65532:65532\nENTRYPOINT [\"node\", \"/app/server.mjs\"]\n", { flag: "wx" });
   }
-  await writeFile(path.join(rootPath, "README.md"), `# ${path.basename(rootPath)}\n\nGenerated from the Osnova ${template} template.\n`, { flag: "wx" });
+  await writeFile(path.join(rootPath, "README.md"), `# ${path.basename(rootPath)}\n\nGenerated from the Queryn ${template} template.\n`, { flag: "wx" });
   process.stdout.write(`Created ${rootPath} from ${template} template.\n`);
 }
 
 function createTemplateManifest(id: string, name: string, template: string): ExtensionManifest {
   if (!new Set(["theme", "note-linter", "tool", "advanced", "oci", "mcp"]).has(template)) throw new Error(`Unknown template: ${template}`);
-  const base = { manifestVersion: "1" as const, id, name, version: "0.1.0", osnova: { minVersion: "0.2.0" } };
+  const base = { manifestVersion: "1" as const, id, name, version: "0.1.0", queryn: { minVersion: "0.2.0" } };
   if (template === "theme") return { ...base, permissions: [], contributes: { themes: [{ id: `${id}.theme`, title: name, tokens: "tokens.json" }] } };
   const runtimeId = `${id}.runtime`;
   const toolId = `${id}.tool`;
@@ -104,7 +104,7 @@ function createTemplateManifest(id: string, name: string, template: string): Ext
 }
 
 function processServerTemplate(id: string): string {
-  return `import { writeFile } from "node:fs/promises";\nimport path from "node:path";\nimport readline from "node:readline";\nreadline.createInterface({ input: process.stdin }).on("line", async (line) => {\n  const request = JSON.parse(line); if (request.id === undefined) return;\n  try {\n    if (request.method === "initialize") return reply(request.id, { protocolVersion: "1" });\n    if (request.method === "health") return reply(request.id, { status: "ready" });\n    if (request.method === "shutdown") return reply(request.id, { ok: true });\n    if (request.method !== "jobs/start") throw new Error("Unknown method");\n    await writeFile(path.join(request.params.paths.outbox, "output.md"), String(request.params.input.text ?? "Osnova output"));\n    reply(request.id, { structured: { ok: true }, artifacts: [{ type: "${id}.output", payloads: [{ path: "output.md", mediaType: "text/markdown" }], context: { mode: "automatic" } }] });\n  } catch (error) { process.stdout.write(JSON.stringify({ jsonrpc: "2.0", id: request.id, error: { code: -32000, message: error.message } }) + "\\n"); }\n});\nfunction reply(id, result) { process.stdout.write(JSON.stringify({ jsonrpc: "2.0", id, result }) + "\\n"); }\n`;
+  return `import { writeFile } from "node:fs/promises";\nimport path from "node:path";\nimport readline from "node:readline";\nreadline.createInterface({ input: process.stdin }).on("line", async (line) => {\n  const request = JSON.parse(line); if (request.id === undefined) return;\n  try {\n    if (request.method === "initialize") return reply(request.id, { protocolVersion: "1" });\n    if (request.method === "health") return reply(request.id, { status: "ready" });\n    if (request.method === "shutdown") return reply(request.id, { ok: true });\n    if (request.method !== "jobs/start") throw new Error("Unknown method");\n    await writeFile(path.join(request.params.paths.outbox, "output.md"), String(request.params.input.text ?? "Queryn output"));\n    reply(request.id, { structured: { ok: true }, artifacts: [{ type: "${id}.output", payloads: [{ path: "output.md", mediaType: "text/markdown" }], context: { mode: "automatic" } }] });\n  } catch (error) { process.stdout.write(JSON.stringify({ jsonrpc: "2.0", id: request.id, error: { code: -32000, message: error.message } }) + "\\n"); }\n});\nfunction reply(id, result) { process.stdout.write(JSON.stringify({ jsonrpc: "2.0", id, result }) + "\\n"); }\n`;
 }
 
 function option(values: string[], name: string): string | undefined {

@@ -3,7 +3,7 @@ import type {
   OperationContext,
   OperationDefinition,
   OperationResult,
-  OsnovaExtension
+  QuerynExtension
 } from "./index.js";
 
 export interface TestInvocation {
@@ -13,7 +13,7 @@ export interface TestInvocation {
   context?: Partial<OperationContext>;
 }
 
-export async function invokeTestOperation(extension: OsnovaExtension, invocation: TestInvocation): Promise<OperationResult> {
+export async function invokeTestOperation(extension: QuerynExtension, invocation: TestInvocation): Promise<OperationResult> {
   const definition = extension.manifest.contributes.operations?.find((item) => item.id === invocation.operationId);
   if (!definition) throw new Error(`Unknown operation: ${invocation.operationId}`);
   const handler = extension.operations?.[invocation.operationId];
@@ -27,7 +27,7 @@ export async function invokeTestOperation(extension: OsnovaExtension, invocation
     projectId: "test-project",
     input: invocation.input ?? {},
     artifacts: [],
-    outboxPath: "/tmp/osnova-extension-test-outbox",
+    outboxPath: "/tmp/queryn-extension-test-outbox",
     signal: abortController.signal,
     reportProgress: () => undefined,
     ...invocation.context
